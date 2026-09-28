@@ -1,0 +1,62 @@
+# Fresh Ink — Preview
+
+> This is an isolated demo preview of the Fresh Ink booking system. Payments are disabled. All data is synthetic — the studio, address, and bookings are fictional and nothing is real.
+
+Fresh Ink Preview Studio is a demo tattoo booking flow: pick a day and time, place a 15-minute hold, lock the slot in free, and open a session pass with a client-generated calendar download. Email is mocked; the pass URL is the source of truth. SMS reminders are simulated.
+
+## Demo studio
+
+- Name: Fresh Ink Preview Studio (fictional, DEMO-labeled everywhere)
+- Address: 123 Demo Street, Saint Paul, MN 55101 (fictional — this studio does not exist)
+- Hours: Mon–Fri 10:00 AM–7:00 PM, Sat 10:00 AM–5:00 PM (America/Chicago)
+- Session length: about 90 minutes
+- Lock-in: free in this preview — no charge, no card, no payment form anywhere
+
+## MCP server
+
+- Endpoint: https://freshink-preview.view.fast/api/public/mcp (Streamable HTTP, no sign-in)
+- Discovery: https://freshink-preview.view.fast/.well-known/mcp.json
+- Tools:
+  - `get_studio_info` — address, hours, session times, how booking works
+  - `list_open_times` — open times between two dates (up to 31 days); elapsed same-day slots excluded
+  - `hold_slot` — holds a time for 15 minutes; returns a free lock-in link for the client
+  - `get_booking_status` — pending, confirmed, expired, or cancelled
+
+Example tool call:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "list_open_times",
+    "arguments": { "from": "2026-10-01", "to": "2026-10-07" }
+  }
+}
+```
+
+## REST endpoints
+
+- `GET /api/public/studio` — studio info
+- `GET /api/public/availability?from=YYYY-MM-DD&to=YYYY-MM-DD` — open times
+- `POST /api/public/holds` — create a hold (supports `Idempotency-Key`)
+- `POST /api/public/holds-confirm` — free lock-in (`{booking_id, hold_secret}`)
+- `GET /api/public/bookings?id=` — booking status
+- `POST /api/public/pass` — pass actions (`confirm`, `reschedule`)
+- `GET /api/public/events` — availability snapshot stream (SSE)
+- `POST /api/public/webhooks` — subscribe to signed push events (`hold.created`, `booking.confirmed`)
+- `POST /api/public/agent-keys` — optional API key for higher rate limits
+- OpenAPI: https://freshink-preview.view.fast/api/public/openapi.json
+
+## Pages
+
+- https://freshink-preview.view.fast/ — 8-step booking wizard
+- https://freshink-preview.view.fast/agents — agent docs
+- https://freshink-preview.view.fast/licenses — OSS credits
+
+## Limits
+
+- Rate limits: anonymous 60 reads/min + 5 writes/hour; keyed 600 reads/min + 30 writes/hour.
+- Reschedules: max 3 per booking, no changes within 24 hours of the session.
+- `noindex, nofollow` on all routes. This preview is not the production site (freshink.art).

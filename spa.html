@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta
+      name="description"
+      content="Fresh Ink preview: book a demo tattoo session in a few steps. Synthetic data only — payments are disabled in this preview."
+    />
+    <title>Fresh Ink — Preview</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- Private analytics (same tracker as production). -->
+    <script defer src="https://umami-lite.view.fast/tracker.js"></script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Fresh Ink Preview Studio",
+        "description": "Isolated demo preview of the Fresh Ink booking system. All data is synthetic and payments are disabled.",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "123 Demo Street",
+          "addressLocality": "Saint Paul",
+          "addressRegion": "MN",
+          "postalCode": "55101",
+          "addressCountry": "US"
+        },
+        "url": "https://freshink-preview.view.fast/",
+        "openingHours": ["Mo-Fr 10:00-19:00", "Sa 10:00-17:00"]
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/spa/main.tsx"></script>
+  </body>
+</html>

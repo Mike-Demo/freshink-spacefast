@@ -1,0 +1,6 @@
+/ /index.html 200
+/agents /index.html 200
+/checkout/* /index.html 200
+/pass/* /index.html 200
+/licenses /index.html 200
+/health /index.html 200

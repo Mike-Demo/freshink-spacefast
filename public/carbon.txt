@@ -1,0 +1,13 @@
+version = "0.5"
+last_updated = 2026-09-28
+
+[org]
+disclosures = [
+    { doc_type = "web-page", url = "https://freshink-preview.view.fast/licenses", domain = "freshink-preview.view.fast", title = "Carbon disclosure for the Fresh Ink preview" },
+]
+
+[upstream]
+services = [
+    { domain = "www.spacefast.dev", service_type = "shared-hosting" },
+    { domain = "view.fast", service_type = "content-delivery-network" },
+]

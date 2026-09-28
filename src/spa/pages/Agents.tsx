@@ -120,7 +120,7 @@ export function AgentsPage(): ReactElement {
           </tbody>
         </table>
         <p className="small">Full spec:</p>
-        <CodeBlock code={`${ORIGIN}/api/public/openapi.json`} label="OpenAPI spec URL" />
+        <CodeBlock code={`${ORIGIN}/api/public/openapi`} label="OpenAPI spec URL" />
       </section>
 
       <section className="card">

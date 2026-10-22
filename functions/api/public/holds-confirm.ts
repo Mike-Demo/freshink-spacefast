@@ -46,7 +46,7 @@ const handle = withErrors(async (request: Request, context: RouteContext): Promi
   }
 
   const result = await confirmHold(env.db, bookingId, holdSecret);
-  if (result.status === "confirmed" && result.access_token) {
+  if (result.transitioned) {
     const row = await first(
       env.db,
       "SELECT email, booking_date, time_slot FROM appointments WHERE id = ? LIMIT 1",
@@ -68,8 +68,10 @@ const handle = withErrors(async (request: Request, context: RouteContext): Promi
   return json({
     booking_id: result.booking_id,
     status: result.status,
-    ...(result.access_token ? { access_token: result.access_token, pass_url: `/pass/${result.access_token}` } : {}),
-    ...(result.status === "confirmed"
+    ...(result.transitioned && result.access_token
+      ? { access_token: result.access_token, pass_url: `/pass/${result.access_token}` }
+      : {}),
+    ...(result.transitioned
       ? { note: "Locked in free — payments are disabled in this preview." }
       : {}),
   });

@@ -485,6 +485,7 @@ export interface ConfirmHoldResult {
   booking_id: string;
   status: "confirmed" | "expired" | "cancelled";
   access_token?: string | undefined;
+  transitioned?: boolean | undefined;
 }
 
 /**
@@ -501,11 +502,7 @@ export async function confirmHold(
   if (!row) throw new InputError("not_found", "No hold with that booking id.", 404);
   const status = String(row["status"] ?? "");
   if (status === "confirmed") {
-    return {
-      booking_id: bookingId,
-      status: "confirmed",
-      access_token: String(row["access_token"] ?? ""),
-    };
+    return { booking_id: bookingId, status: "confirmed" };
   }
   if (status !== "pending") {
     return { booking_id: bookingId, status: status as ConfirmHoldResult["status"] };
@@ -515,25 +512,46 @@ export async function confirmHold(
   }
   const nowIso = new Date().toISOString();
   if (String(row["hold_expires_at"] ?? "") <= nowIso) {
-    await run(
+    const expired = await first(
       db,
-      `UPDATE appointments SET status = 'expired', payment_status = 'expired' WHERE id = ?`,
+      `UPDATE appointments
+       SET status = 'expired', payment_status = 'expired'
+       WHERE id = ? AND status = 'pending' AND hold_secret = ? AND hold_expires_at <= ?
+       RETURNING id`,
       bookingId,
+      holdSecret,
+      nowIso,
     );
-    return { booking_id: bookingId, status: "expired" };
+    if (expired) return { booking_id: bookingId, status: "expired" };
+    const latest = await first(db, "SELECT status FROM appointments WHERE id = ? LIMIT 1", bookingId);
+    return {
+      booking_id: bookingId,
+      status: String(latest?.["status"] ?? "expired") as ConfirmHoldResult["status"],
+    };
   }
   // preview: free lock-in, no payment processed
-  await run(
+  const confirmed = await first(
     db,
     `UPDATE appointments
      SET status = 'confirmed', payment_status = 'paid', hold_secret = NULL
-     WHERE id = ?`,
+     WHERE id = ? AND status = 'pending' AND hold_secret = ? AND hold_expires_at > ?
+     RETURNING access_token`,
     bookingId,
+    holdSecret,
+    nowIso,
   );
+  if (!confirmed) {
+    const latest = await first(db, "SELECT status FROM appointments WHERE id = ? LIMIT 1", bookingId);
+    return {
+      booking_id: bookingId,
+      status: String(latest?.["status"] ?? "expired") as ConfirmHoldResult["status"],
+    };
+  }
   return {
     booking_id: bookingId,
     status: "confirmed",
-    access_token: String(row["access_token"] ?? ""),
+    access_token: String(confirmed["access_token"] ?? ""),
+    transitioned: true,
   };
 }
 

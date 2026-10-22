@@ -99,7 +99,7 @@ Tables to create in `ensureSchema` (all `IF NOT EXISTS`):
 ### 2.4 Business logic ported from plpgsql (in `functions/_core/booking.ts`)
 
 - `create_pending_appointment` → `createHold()`: validate name/phone/email; reject past dates; **reject elapsed same-day slots (America/Chicago)**; check blocked_slots; expire stale pendings on the same slot opportunistically; check double-booking; insert pending hold (15-min expiry); return `{id, hold_secret}`.
-- `confirm_free_hold` → `confirmHold()`: verify hold_secret; reject if expired (mark expired); set confirmed/paid; clear hold_secret; fire `booking.confirmed` webhook (mocked email noted).
+- `confirm_free_hold` → `confirmHold()`: verify hold_secret; reject if expired (mark expired); atomically set confirmed/paid and clear hold_secret. Only the pending-to-confirmed transition returns the access token and triggers the confirmation email/webhook; retries return only booking ID and status.
 - `get_unavailable_slots` → `getUnavailableSlots()`: confirmed bookings + live pending holds + blocked_slots for date range.
 - `get_booking_status` → `getBookingStatus()`: lazy expiry computation.
 - `confirm_attendance`, reschedule (max 3, 24h cutoff) → pass-page actions.
